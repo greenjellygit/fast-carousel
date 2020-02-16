@@ -1,0 +1,26 @@
+::ng-deep .cdk-virtual-scroll-content-wrapper {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: transparent;
+}
+
+.viewport {
+  height: 80px;
+  border: 1px solid black;
+  overflow: hidden;
+}
+
+.slide {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  display: grid;
+  align-self: normal;
+  justify-items: center;
+  align-items: center;
+}
+
+.carousel-container:focus {
+  outline: none;
+}

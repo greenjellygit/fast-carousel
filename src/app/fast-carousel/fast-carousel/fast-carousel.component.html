@@ -1,0 +1,23 @@
+<div #container class="carousel-container" tabindex="0">
+  <button (click)="prev()">
+    prev
+  </button>
+  <cdk-virtual-scroll-viewport [itemSize]="width"
+                               [maxBufferPx]="width"
+                               [minBufferPx]="width"
+                               [style.width]="width + 'px'"
+                               class="viewport"
+                               orientation="horizontal">
+    <div (mousedown)="onMouseDrag($event)"
+         (touchcancel)="onTouchCancel()"
+         (touchstart)="onTouchDrag($event)"
+         *cdkVirtualFor="let data of dataSource; templateCacheSize: 0"
+         [style.width]="width + 'px'"
+         class="slide">
+      <ng-container *ngTemplateOutlet="dataTemplate, context: {$implicit: data}"></ng-container>
+    </div>
+  </cdk-virtual-scroll-viewport>
+  <button (click)="next()">
+    next
+  </button>
+</div>
