@@ -6,8 +6,10 @@ import {
   ContentChild,
   ElementRef,
   EventEmitter,
+  HostListener,
   Input,
   OnDestroy,
+  OnInit,
   Output,
   TemplateRef,
   ViewChild
@@ -21,7 +23,7 @@ import {concatMap, filter, map, take, takeUntil, tap, throttleTime} from 'rxjs/o
   styleUrls: ['./fast-carousel.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class FastCarouselComponent implements AfterViewInit, OnDestroy {
+export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() public dataSource: any[];
   @Input() public duration: number = 150;
@@ -35,7 +37,7 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
   private scrollSubject: Subject<ScrollEvent> = new Subject();
   private scrollSubscription: Subscription;
 
-  constructor() {
+  constructor(private elementRef: ElementRef<HTMLElement>) {
     this.scrollSubscription = this.scrollSubject.pipe(
       concatMap((e: ScrollEvent) => this.scrollTo(e))
     ).subscribe((index: number) => {
@@ -43,7 +45,16 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  public ngOnInit(): void {
+    fromEvent(window, 'resize').pipe(
+      throttleTime(150)
+    ).subscribe(() => {
+      this.setWidth();
+    });
+  }
+
   public ngAfterViewInit(): void {
+    this.setWidth();
     fromEvent(this.container.nativeElement, 'keydown').pipe(
       throttleTime(150)
     ).subscribe((e: KeyboardEvent) => {
@@ -85,6 +96,11 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
     this.scrollSubscription.unsubscribe();
   }
 
+  private setWidth() {
+    this.width = this.elementRef.nativeElement.clientWidth;
+    this.snapToIndex();
+  }
+
   private handleDrag(e: SlideDragEvent): void {
     const startDragX = e.getX();
     const startPos = this.cdkScrollable.measureScrollOffset('left');
@@ -111,7 +127,7 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
       filter(() => lastDragX != null)
     ).subscribe(() => {
       const toLeft: boolean = (startDragX - lastDragX) < 0;
-      this.snapToClosest(toLeft);
+      this.snapToDirection(toLeft);
     });
   }
 
@@ -133,13 +149,17 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  private snapToClosest(toLeft: boolean): void {
+  private snapToDirection(toLeft: boolean): void {
     const sourceX = this.cdkScrollable.measureScrollOffset('left');
     const closestIndex = toLeft ? this.index - 1 : this.index + 1;
     if (closestIndex >= 0 && this.index !== closestIndex || (sourceX % this.width) !== 0) {
       this.index = closestIndex;
       this.scrollSubject.next({sourceX, targetX: closestIndex * this.width, index: closestIndex});
     }
+  }
+
+  private snapToIndex() {
+    this.cdkScrollable.scrollTo({left: this.index * this.width, behavior: 'auto'});
   }
 
   private clamp(value, min, max): number {

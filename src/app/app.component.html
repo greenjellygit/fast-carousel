@@ -1,4 +1,8 @@
-<fast-carousel [dataSource]="dataSource">
-  <app-placeholder *fastCarouselDef="let elem"
-                   [text]="elem.text"></app-placeholder>
-</fast-carousel>
+<div class="carousel-container">
+  <fast-carousel [dataSource]="dataSource" (slideChanged)="onSlideChanged($event)">
+    <app-placeholder *fastCarouselDef="let elem"
+                     [text]="elem.text"></app-placeholder>
+  </fast-carousel>
+
+  {{slideIndex}} / {{dataSource.length}}
+</div>

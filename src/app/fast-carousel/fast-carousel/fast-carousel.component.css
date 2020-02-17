@@ -6,9 +6,10 @@
 }
 
 .viewport {
-  height: 80px;
-  border: 1px solid black;
+  height: 300px;
   overflow: hidden;
+  border: 1px solid black;
+  box-sizing: border-box;
 }
 
 .slide {
@@ -19,8 +20,21 @@
   align-self: normal;
   justify-items: center;
   align-items: center;
+  overflow: hidden;
+  border-right: 1px solid black;
+  box-sizing: border-box;
 }
 
 .carousel-container:focus {
   outline: none;
+}
+
+:host {
+  display: block;
+  background-color: white;
+}
+
+.buttons {
+  grid-template-columns: auto auto;
+  display: grid;
 }

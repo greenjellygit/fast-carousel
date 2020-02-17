@@ -8,12 +8,17 @@ import {Component, OnInit} from '@angular/core';
 export class AppComponent implements OnInit {
   title = 'fast-carousel';
   dataSource: Placeholder[];
+  slideIndex = 0;
 
   ngOnInit(): void {
-    this.dataSource = [...Array(1000).keys()].map(i => ({text: (i + 1).toString()}));
+    this.dataSource = [...Array(10000).keys()].map(i => ({text: (i + 1)}));
+  }
+
+  onSlideChanged(slideIndex: number) {
+    this.slideIndex = slideIndex;
   }
 }
 
 interface Placeholder {
-  text: string;
+  text: number;
 }

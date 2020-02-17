@@ -7,9 +7,16 @@ import {Component, Input, OnInit} from '@angular/core';
 })
 export class PlaceholderComponent implements OnInit {
 
-  @Input() text: string;
+  @Input() text: number;
+  asd: string;
+  public imageWidth: number;
 
   ngOnInit(): void {
-    this.text += ' blabla';
+    this.imageWidth = this.getRandomArbitrary(200, 500);
+    this.asd = ' blabla';
+  }
+
+  getRandomArbitrary(min, max) {
+    return Math.round(Math.random() * (max - min) + min);
   }
 }
