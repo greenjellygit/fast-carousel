@@ -125,6 +125,46 @@
           }
         }
       }
+    },
+    "ngx-fast-carousel": {
+      "projectType": "library",
+      "root": "projects/ngx-fast-carousel",
+      "sourceRoot": "projects/ngx-fast-carousel/src",
+      "prefix": "lib",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-ng-packagr:build",
+          "options": {
+            "tsConfig": "projects/ngx-fast-carousel/tsconfig.lib.json",
+            "project": "projects/ngx-fast-carousel/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/ngx-fast-carousel/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/ngx-fast-carousel/src/test.ts",
+            "tsConfig": "projects/ngx-fast-carousel/tsconfig.spec.json",
+            "karmaConfig": "projects/ngx-fast-carousel/karma.conf.js"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/ngx-fast-carousel/tsconfig.lib.json",
+              "projects/ngx-fast-carousel/tsconfig.spec.json"
+            ],
+            "exclude": [
+              "**/node_modules/**"
+            ]
+          }
+        }
+      }
     }
   },
   "defaultProject": "fast-carousel"
