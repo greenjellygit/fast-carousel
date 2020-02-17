@@ -1,6 +1,4 @@
 <fast-carousel [dataSource]="dataSource">
-  <ng-template let-data>
-    <app-placeholder [text]="data.text"></app-placeholder>
-  </ng-template>
+  <app-placeholder *fastCarouselDef="let elem"
+                   [text]="elem.text"></app-placeholder>
 </fast-carousel>
-

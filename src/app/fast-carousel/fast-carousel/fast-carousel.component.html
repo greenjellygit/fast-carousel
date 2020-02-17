@@ -1,4 +1,6 @@
-<div #container class="carousel-container" tabindex="0">
+<div #container
+     class="carousel-container"
+     tabindex="0">
   <button (click)="prev()">
     prev
   </button>
@@ -11,10 +13,10 @@
     <div (mousedown)="onMouseDrag($event)"
          (touchcancel)="onTouchCancel()"
          (touchstart)="onTouchDrag($event)"
-         *cdkVirtualFor="let data of dataSource; templateCacheSize: 0"
+         *cdkVirtualFor="let data of dataSource; let i = index; templateCacheSize: 0"
          [style.width]="width + 'px'"
          class="slide">
-      <ng-container *ngTemplateOutlet="dataTemplate, context: {$implicit: data}"></ng-container>
+      <ng-container *ngTemplateOutlet="dataTemplate, context: {$implicit: data, index: i}"></ng-container>
     </div>
   </cdk-virtual-scroll-viewport>
   <button (click)="next()">

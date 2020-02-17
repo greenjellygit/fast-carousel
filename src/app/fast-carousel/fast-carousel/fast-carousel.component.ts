@@ -45,7 +45,7 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
 
   public ngAfterViewInit(): void {
     fromEvent(this.container.nativeElement, 'keydown').pipe(
-      throttleTime(100)
+      throttleTime(150)
     ).subscribe((e: KeyboardEvent) => {
       if (e.code === 'ArrowLeft') {
         this.prev();
@@ -55,29 +55,29 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  public next() {
+  public next(): void {
     if (this.index < this.dataSource.length - 1) {
       const targetX = ++this.index * this.width;
       this.scrollSubject.next({sourceX: targetX - this.width, targetX, index: this.index});
     }
   }
 
-  public prev() {
+  public prev(): void {
     if (this.index > 0) {
       const targetX = --this.index * this.width;
       this.scrollSubject.next({sourceX: targetX + this.width, targetX, index: this.index});
     }
   }
 
-  public onMouseDrag(e: MouseEvent) {
+  public onMouseDrag(e: MouseEvent): void {
     this.handleDrag(new SlideMouseDragEvent(e));
   }
 
-  public onTouchDrag(e: TouchEvent) {
+  public onTouchDrag(e: TouchEvent): void {
     this.handleDrag(new SlideTouchDragEvent(e));
   }
 
-  onTouchCancel() {
+  public onTouchCancel(): void {
     // not sure why touch start event stop work without this
   }
 
@@ -88,7 +88,7 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
   private handleDrag(e: SlideDragEvent): void {
     const startDragX = e.getX();
     const startPos = this.cdkScrollable.measureScrollOffset('left');
-    let lastDragX = 0;
+    let lastDragX;
 
     const drag$ = e.drag$().pipe(
       throttleTime(10)
@@ -107,14 +107,15 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
     });
 
     stop$.pipe(
-      take(1)
+      take(1),
+      filter(() => lastDragX != null)
     ).subscribe(() => {
       const toLeft: boolean = (startDragX - lastDragX) < 0;
       this.snapToClosest(toLeft);
     });
   }
 
-  private scrollTo({sourceX, targetX, index}: ScrollEvent) {
+  private scrollTo({sourceX, targetX, index}: ScrollEvent): Observable<number> {
     const fps: number = 60;
     const totalFrames: number = Math.round((this.duration / 1000) * fps);
     const renderInterval: number = 1000 / fps;
@@ -132,7 +133,7 @@ export class FastCarouselComponent implements AfterViewInit, OnDestroy {
     );
   }
 
-  private snapToClosest(toLeft: boolean) {
+  private snapToClosest(toLeft: boolean): void {
     const sourceX = this.cdkScrollable.measureScrollOffset('left');
     const closestIndex = toLeft ? this.index - 1 : this.index + 1;
     if (closestIndex >= 0 && this.index !== closestIndex || (sourceX % this.width) !== 0) {
