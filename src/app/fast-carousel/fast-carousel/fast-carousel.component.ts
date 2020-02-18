@@ -2,11 +2,11 @@ import {CdkScrollable} from '@angular/cdk/overlay';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ContentChild,
   ElementRef,
   EventEmitter,
-  HostListener,
   Input,
   OnDestroy,
   OnInit,
@@ -15,7 +15,7 @@ import {
   ViewChild
 } from '@angular/core';
 import {fromEvent, interval, Observable, Subject, Subscription} from 'rxjs';
-import {concatMap, filter, map, take, takeUntil, tap, throttleTime} from 'rxjs/operators';
+import {concatMap, debounceTime, filter, map, take, takeUntil, tap, throttleTime} from 'rxjs/operators';
 
 @Component({
   selector: 'fast-carousel',
@@ -37,7 +37,8 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   private scrollSubject: Subject<ScrollEvent> = new Subject();
   private scrollSubscription: Subscription;
 
-  constructor(private elementRef: ElementRef<HTMLElement>) {
+  constructor(private elementRef: ElementRef<HTMLElement>,
+              private changeDetectorRef: ChangeDetectorRef) {
     this.scrollSubscription = this.scrollSubject.pipe(
       concatMap((e: ScrollEvent) => this.scrollTo(e))
     ).subscribe((index: number) => {
@@ -47,7 +48,7 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public ngOnInit(): void {
     fromEvent(window, 'resize').pipe(
-      throttleTime(150)
+      debounceTime(50)
     ).subscribe(() => {
       this.setWidth();
     });
@@ -99,6 +100,7 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   private setWidth() {
     this.width = this.elementRef.nativeElement.clientWidth;
     this.snapToIndex();
+    this.changeDetectorRef.detectChanges();
   }
 
   private handleDrag(e: SlideDragEvent): void {
