@@ -7,6 +7,7 @@ import {
   ContentChild,
   ElementRef,
   EventEmitter,
+  HostBinding,
   Input,
   OnDestroy,
   OnInit,
@@ -26,6 +27,7 @@ import {concatMap, debounceTime, filter, map, take, takeUntil, tap, throttleTime
 export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() public dataSource: any[];
+  @Input() @HostBinding('style.backgroundColor') public backgroundColor: string;
   @Input() public duration: number = 150;
   @Input() public width: number;
   @Output() public slideChanged: EventEmitter<number> = new EventEmitter();
