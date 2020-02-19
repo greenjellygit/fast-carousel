@@ -27,7 +27,7 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() public dataSource: any[];
   @Input() public duration: number = 150;
-  @Input() public width: number = 200;
+  @Input() public width: number;
   @Output() public slideChanged: EventEmitter<number> = new EventEmitter();
   @ContentChild(TemplateRef) public dataTemplate: TemplateRef<any>;
 
@@ -36,6 +36,7 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   private index = 0;
   private scrollSubject: Subject<ScrollEvent> = new Subject();
   private scrollSubscription: Subscription;
+  private containerWidth: number = 0;
 
   constructor(private elementRef: ElementRef<HTMLElement>,
               private changeDetectorRef: ChangeDetectorRef) {
@@ -50,12 +51,12 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
     fromEvent(window, 'resize').pipe(
       debounceTime(50)
     ).subscribe(() => {
-      this.setWidth();
+      this.calculateWidth();
     });
   }
 
   public ngAfterViewInit(): void {
-    this.setWidth();
+    this.calculateWidth();
     fromEvent(this.container.nativeElement, 'keydown').pipe(
       throttleTime(150)
     ).subscribe((e: KeyboardEvent) => {
@@ -69,15 +70,15 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public next(): void {
     if (this.index < this.dataSource.length - 1) {
-      const targetX = ++this.index * this.width;
-      this.scrollSubject.next({sourceX: targetX - this.width, targetX, index: this.index});
+      const targetX = ++this.index * this.getSlideWidth();
+      this.scrollSubject.next({sourceX: targetX - this.getSlideWidth(), targetX, index: this.index});
     }
   }
 
   public prev(): void {
     if (this.index > 0) {
-      const targetX = --this.index * this.width;
-      this.scrollSubject.next({sourceX: targetX + this.width, targetX, index: this.index});
+      const targetX = --this.index * this.getSlideWidth();
+      this.scrollSubject.next({sourceX: targetX + this.getSlideWidth(), targetX, index: this.index});
     }
   }
 
@@ -97,8 +98,16 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
     this.scrollSubscription.unsubscribe();
   }
 
-  private setWidth() {
-    this.width = this.elementRef.nativeElement.clientWidth;
+  public getSlideWidth(): number {
+    if (this.width != null) {
+      return this.width;
+    } else {
+      return this.containerWidth;
+    }
+  }
+
+  private calculateWidth() {
+    this.containerWidth = this.elementRef.nativeElement.clientWidth;
     this.snapToIndex();
     this.changeDetectorRef.detectChanges();
   }
@@ -117,7 +126,7 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
       takeUntil(stop$),
       map((s: SlideDragEvent) => {
         lastDragX = s.getX();
-        return this.clamp(startPos + (startDragX - s.getX()), startPos - this.width, startPos + this.width);
+        return this.clamp(startPos + (startDragX - s.getX()), startPos - this.getSlideWidth(), startPos + this.getSlideWidth());
       }),
       filter((left: number) => left !== startPos)
     ).subscribe((left: number) => {
@@ -154,14 +163,14 @@ export class FastCarouselComponent implements OnInit, AfterViewInit, OnDestroy {
   private snapToDirection(toLeft: boolean): void {
     const sourceX = this.cdkScrollable.measureScrollOffset('left');
     const closestIndex = toLeft ? this.index - 1 : this.index + 1;
-    if (closestIndex >= 0 && this.index !== closestIndex || (sourceX % this.width) !== 0) {
+    if (closestIndex >= 0 && this.index !== closestIndex || (sourceX % this.getSlideWidth()) !== 0) {
       this.index = closestIndex;
-      this.scrollSubject.next({sourceX, targetX: closestIndex * this.width, index: closestIndex});
+      this.scrollSubject.next({sourceX, targetX: closestIndex * this.getSlideWidth(), index: closestIndex});
     }
   }
 
   private snapToIndex() {
-    this.cdkScrollable.scrollTo({left: this.index * this.width, behavior: 'auto'});
+    this.cdkScrollable.scrollTo({left: this.index * this.getSlideWidth(), behavior: 'auto'});
   }
 
   private clamp(value, min, max): number {
@@ -194,13 +203,13 @@ class SlideTouchDragEvent implements SlideDragEvent {
   }
 
   drag$(): Observable<SlideDragEvent> {
-    return fromEvent(document, 'touchmove').pipe(
+    return fromEvent(document, 'touchmove', {passive: true}).pipe(
       map((e: TouchEvent) => new SlideTouchDragEvent(e))
     );
   }
 
   stop$(): Observable<SlideDragEvent> {
-    return fromEvent(document, 'touchend').pipe(
+    return fromEvent(document, 'touchend', {passive: true}).pipe(
       map((e: TouchEvent) => new SlideTouchDragEvent(e))
     );
   }

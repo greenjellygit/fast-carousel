@@ -1,5 +1,6 @@
 <div class="carousel-container">
-  <fast-carousel [dataSource]="dataSource" (slideChanged)="onSlideChanged($event)">
+  <fast-carousel [dataSource]="dataSource"
+                 (slideChanged)="onSlideChanged($event)">
     <app-placeholder *fastCarouselDef="let elem"
                      [text]="elem.text"></app-placeholder>
   </fast-carousel>
